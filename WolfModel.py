@@ -530,7 +530,32 @@ run_stats = model.datacollector.get_model_vars_dataframe()
 # In[9]:
 
 
-from mesa.visualization.modules import CanvasGrid, ChartModule
+import matplotlib.pyplot as plt
+
+
+def plot_population_Stats(stats, months, title, ylabel):
+    plt.figure(figsize=(10, 6))
+    plt.xticks(range(0, months, 12), range(2003, 2016))
+    plt.plot(range(months), stats)
+    plt.xlabel('Time (Months)')
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+
+# In[10]:
+
+
+plot_population_Stats(run_stats['wolves_population'], months, "Wolf Population Size Over Time", "Population Size")
+plot_population_Stats(run_stats['packs_population'], months, "Wolf Packs Amount Over Time", "packs amount")
+plot_population_Stats(run_stats['pairs_amount'], months, "Wolf Pairs Amount Over Time", "pairs amount")
+
+
+# In[11]:
+
+
+from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 
 
@@ -543,46 +568,22 @@ def agent_portrayal(agent):
     return portrayal
 
 
-measures = ["wolves_population", "packs_population", "pairs_amount", "pubs_amount", "subadults_amount",
-            "vagrants_amount", "adults_amount", "average_age"]
-wolves_population = ChartModule([{"label": "wolves_population",
-                                  "Label": "wolves_population",
-                                  "Color": "#0000FF"}],
-                                data_collector_name='datacollector')
-
-packs_population = ChartModule([{"label": "packs_population",
-                                 "Label": "packs_population",
-                                 "Color": "#FF0000"}],
-                               data_collector_name='datacollector')
-
-pairs_amount = ChartModule([{"label": "pairs_amount",
-                             "Label": "pairs_amount",
-                             "Color": "#00FF00"}],
-                           data_collector_name='datacollector')
-
-legend = ChartModule([{"label": "pubs",
-                       "Label": "pubs_amount",
-                       "Color": "#0000FF"},
-                      {"label": "subadults",
-                       "Label": "subadults_amount",
-                       "Color": "#FFFF00"},
-                      {"label": "vagrants",
-                       "Label": "vagrants_amount",
-                       "Color": "#00FF00"},
-                      {"label": "adults",
-                       "Label": "adults_amount",
-                       "Color": "#FF0000"}],
-                     data_collector_name='datacollector')
-
 grid = CanvasGrid(agent_portrayal, 240, 180, 1200, 900)
+
+model_params = {
+    "title": mesa.visualization.StaticText("Legend:"),
+    "pubs": mesa.visualization.StaticText("Pubs: blue"),
+    "subadults": mesa.visualization.StaticText("Subadults: yellow"),
+    "vagrants": mesa.visualization.StaticText("Vagrants: green"),
+    "adults": mesa.visualization.StaticText("Adults: red")
+}
 
 server = ModularServer(
     WolfModel,
-    [grid, legend, wolves_population, packs_population, pairs_amount],
+    [grid],
     "Wolf Model",
-    {}
+    model_params
 )
 
 server.port = 8521
 server.launch()
-
